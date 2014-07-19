@@ -15,6 +15,8 @@ import java.sql.Statement;
 public class ContactServlet extends HttpServlet {
 	public void doGet(HttpServletRequest request, HttpServletResponse response) 
 		throws IOException, ServletException {
+		String name = null;
+		
 		if(request.getParameter("contactId") == null){
 			response.getWriter().println("Get all contacts.");
 			
@@ -33,7 +35,9 @@ public class ContactServlet extends HttpServlet {
 				stmt = connection.createStatement();
 				rs = stmt.executeQuery("select * from contact");
 				while(rs.next()){
-					response.getWriter().println("Name:" + rs.getString("name"));
+					name = rs.getString("name");
+					
+					response.getWriter().println("Name:" + name);
 				}
 			} catch(SQLException sqle){
 				sqle.printStackTrace();
@@ -81,7 +85,9 @@ public class ContactServlet extends HttpServlet {
 				stmt = connection.createStatement();
 				rs = stmt.executeQuery("select * from contact where id=" + request.getParameter("contactId"));
 				if(rs.next()){
-					response.getWriter().println("Name:" + rs.getString("name"));
+					name = rs.getString("name");
+
+					response.getWriter().println("Name:" + name);
 				} else {
 					response.getWriter().println("Contact not found.");
 				}	
