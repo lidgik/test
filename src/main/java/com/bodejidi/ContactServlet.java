@@ -30,9 +30,12 @@ public class ContactServlet extends HttpServlet {
 		try{
 			connection = DriverManager.getConnection("jdbc:mysql://localhost/test?" + "user=root" + "&password=");
 			stmt = connection.createStatement();
-			rs = stmt.executeQuery("select * from contact where id=1");
-			rs.next();
-			response.getWriter().println(rs.getString("name"));
+			rs = stmt.executeQuery("select * from contact where id=" + request.getParameter("contactId"));
+			if(rs.next()){
+				response.getWriter().println("Name:" + rs.getString("name"));
+			} else {
+				response.getWriter().println("Contact not found.");
+			}	
 		} catch(SQLException sqle){
 			sqle.printStackTrace();
 		}
