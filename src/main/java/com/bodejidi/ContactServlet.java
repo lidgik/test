@@ -17,6 +17,10 @@ public class ContactServlet extends HttpServlet {
 		throws IOException, ServletException {
 		String name = null;
 		
+		Connection connection = null;
+		Statement stmt = null;
+		ResultSet rs = null;
+		
 		if(request.getParameter("contactId") == null){
 			response.getWriter().println("Get all contacts.");
 			
@@ -25,10 +29,6 @@ public class ContactServlet extends HttpServlet {
 			} catch(Exception e){
 				// handle the error
 			}
-		
-			Connection connection = null;
-			Statement stmt = null;
-			ResultSet rs = null;
 
 			try{
 				connection = DriverManager.getConnection("jdbc:mysql://localhost/test?" + "user=root" + "&password=");
@@ -75,10 +75,6 @@ public class ContactServlet extends HttpServlet {
 			} catch(Exception e){
 				// handle the error
 			}
-		
-			Connection connection = null;
-			Statement stmt = null;
-			ResultSet rs = null;
 
 			try{
 				connection = DriverManager.getConnection("jdbc:mysql://localhost/test?" + "user=root" + "&password=");
