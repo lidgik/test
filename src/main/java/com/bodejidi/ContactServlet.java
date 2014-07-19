@@ -12,18 +12,25 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
+
 public class ContactServlet extends HttpServlet {
 	public void doGet(HttpServletRequest request, HttpServletResponse response) 
 		throws IOException, ServletException {
+	    Integer id = null;
 		String name = null;
-		
+	
 		Connection connection = null;
 		Statement stmt = null;
 		ResultSet rs = null;
 		
 		if(request.getParameter("contactId") == null){
 			response.getWriter().println("Get all contacts.");
-			
+			List contacts = new ArrayList();
+
 			try{
 				Class.forName("com.mysql.jdbc.Driver").newInstance();
 			} catch(Exception e){
@@ -35,9 +42,11 @@ public class ContactServlet extends HttpServlet {
 				stmt = connection.createStatement();
 				rs = stmt.executeQuery("select * from contact");
 				while(rs.next()){
-					name = rs.getString("name");
+					Map contact = new HashMap();
 					
-					response.getWriter().println("Name:" + name);
+					contact.put("name", rs.getString("name"));
+					
+					contacts.add(contact);
 				}
 			} catch(SQLException sqle){
 				sqle.printStackTrace();
@@ -65,6 +74,12 @@ public class ContactServlet extends HttpServlet {
 				} catch(Exception e){
 					// handle the error
 				}
+			}	
+
+			for(Object obj: contacts){	
+				Map contact = (Map) obj;
+
+				response.getWriter().println("Name:" + contact.get("name"));
 			}
 
 		} else{
@@ -81,9 +96,14 @@ public class ContactServlet extends HttpServlet {
 				stmt = connection.createStatement();
 				rs = stmt.executeQuery("select * from contact where id=" + request.getParameter("contactId"));
 				if(rs.next()){
+					id = rs.getInt("id");
 					name = rs.getString("name");
 
-					response.getWriter().println("Name:" + name);
+					if(id != null){
+						response.getWriter().println("Name:" + name);
+					} else {
+						response.getWriter().println("Contact not found.");
+					}
 				} else {
 					response.getWriter().println("Contact not found.");
 				}	
