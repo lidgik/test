@@ -14,8 +14,6 @@ import java.sql.Statement;
 
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Map;
-import java.util.HashMap;
 
 public class ContactServlet extends HttpServlet {
 	public void doGet(HttpServletRequest request, HttpServletResponse response) 
@@ -30,19 +28,17 @@ public class ContactServlet extends HttpServlet {
 		if(request.getParameter("contactId") == null){
 			response.getWriter().println("Get all contacts.");
 
-			for(Object obj: getAllContacts()){	
-				Map contact = (Map) obj;
-
-				response.getWriter().println("Name:" + contact.get("name"));
+			for(Contact contact: getAllContacts()) {
+				response.getWriter().println("Name:" + contact.getName());
 			}
 
 		} else{
-			Map contact = new HashMap();
+			Contact contact = new Contact();
 			contact = getContactById(request.getParameter("contactId"));
 			response.getWriter().println("get contact by id:" + request.getParameter("contactId"));
 			
-			if(contact.get("id") != null){
-				response.getWriter().println("Name:" + contact.get("name"));
+			if(contact.getId() != null){
+				response.getWriter().println("Name:" + contact.getName());
 			} else {
 				response.getWriter().println("Contact not found.");
 			}
@@ -51,7 +47,7 @@ public class ContactServlet extends HttpServlet {
 	}
 	
 
-	public List getAllContacts(){	
+	public List<Contact> getAllContacts(){	
 		Connection connection = null;
 		Statement stmt = null;
 		ResultSet rs = null;
@@ -69,9 +65,9 @@ public class ContactServlet extends HttpServlet {
 			stmt = connection.createStatement();
 			rs = stmt.executeQuery("select * from contact");
 			while(rs.next()){
-				Map contact = new HashMap();
+				Contact contact = new Contact();
 
-				contact.put("name", rs.getString("name"));
+				contact.setName(rs.getString("name"));
 
 				contacts.add(contact);
 			}
@@ -105,11 +101,11 @@ public class ContactServlet extends HttpServlet {
 		return contacts;
 	}
 
-	public Map getContactById(String id){
+	public Contact getContactById(String id){
 		Connection connection = null;
 		Statement stmt = null;
 		ResultSet rs = null;
-		Map contact = new HashMap();
+		Contact contact = new Contact();
 			
 		try{
 			Class.forName("com.mysql.jdbc.Driver").newInstance();
@@ -122,8 +118,8 @@ public class ContactServlet extends HttpServlet {
 			stmt = connection.createStatement();
 			rs = stmt.executeQuery("select * from contact where id=" + id);
 			if(rs.next()){
-				contact.put("id", rs.getInt("id"));
-				contact.put("name", rs.getString("name"));
+				contact.setId(rs.getInt("id"));
+				contact.setName(rs.getString("name"));
 			} 
 		} catch(SQLException sqle){
 			sqle.printStackTrace();
