@@ -37,57 +37,16 @@ public class ContactServlet extends HttpServlet {
 			}
 
 		} else{
+			Map contact = new HashMap();
+			contact = getContactById(request.getParameter("contactId"));
 			response.getWriter().println("get contact by id:" + request.getParameter("contactId"));
 			
-			try{
-				Class.forName("com.mysql.jdbc.Driver").newInstance();
-			} catch(Exception e){
-				// handle the error
+			if(contact.get("id") != null){
+				response.getWriter().println("Name:" + contact.get("name"));
+			} else {
+				response.getWriter().println("Contact not found.");
 			}
-
-			try{
-				connection = DriverManager.getConnection("jdbc:mysql://localhost/test?" + "user=root" + "&password=");
-				stmt = connection.createStatement();
-				rs = stmt.executeQuery("select * from contact where id=" + request.getParameter("contactId"));
-				if(rs.next()){
-					id = rs.getInt("id");
-					name = rs.getString("name");
-
-					if(id != null){
-						response.getWriter().println("Name:" + name);
-					} else {
-						response.getWriter().println("Contact not found.");
-					}
-				} else {
-					response.getWriter().println("Contact not found.");
-				}	
-			} catch(SQLException sqle){
-				sqle.printStackTrace();
-			}
-
-			if(rs != null){
-				try{
-					rs.close();
-				} catch(Exception e){
-					// handle the error
-				}
-			}
-		
-			if(stmt != null){
-				try{
-					stmt.close();
-				} catch(Exception e){
-					// handle the error
-				}
-			}
-		
-			if(connection != null){
-				try{
-					connection.close();
-				} catch(Exception e){
-					// handle the error
-				}
-			}
+	
 		}
 	}
 	
@@ -144,5 +103,55 @@ public class ContactServlet extends HttpServlet {
 			}
 		}	
 		return contacts;
+	}
+
+	public Map getContactById(String id){
+		Connection connection = null;
+		Statement stmt = null;
+		ResultSet rs = null;
+		Map contact = new HashMap();
+			
+		try{
+			Class.forName("com.mysql.jdbc.Driver").newInstance();
+		} catch(Exception e){
+				// handle the error
+		}
+
+		try{
+			connection = DriverManager.getConnection("jdbc:mysql://localhost/test?" + "user=root" + "&password=");
+			stmt = connection.createStatement();
+			rs = stmt.executeQuery("select * from contact where id=" + id);
+			if(rs.next()){
+				contact.put("id", rs.getInt("id"));
+				contact.put("name", rs.getString("name"));
+			} 
+		} catch(SQLException sqle){
+			sqle.printStackTrace();
+		}
+
+		if(rs != null){
+			try{
+				rs.close();
+			} catch(Exception e){
+				// handle the error
+			}
+		}
+		
+		if(stmt != null){
+			try{
+				stmt.close();
+			} catch(Exception e){
+				// handle the error
+			}
+		}
+		
+		if(connection != null){
+			try{
+				connection.close();
+			} catch(Exception e){
+				// handle the error
+			}
+		}
+		return contact;
 	}
 }
