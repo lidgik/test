@@ -29,54 +29,8 @@ public class ContactServlet extends HttpServlet {
 		
 		if(request.getParameter("contactId") == null){
 			response.getWriter().println("Get all contacts.");
-			List contacts = new ArrayList();
 
-			try{
-				Class.forName("com.mysql.jdbc.Driver").newInstance();
-			} catch(Exception e){
-				// handle the error
-			}
-
-			try{
-				connection = DriverManager.getConnection("jdbc:mysql://localhost/test?" + "user=root" + "&password=");
-				stmt = connection.createStatement();
-				rs = stmt.executeQuery("select * from contact");
-				while(rs.next()){
-					Map contact = new HashMap();
-					
-					contact.put("name", rs.getString("name"));
-					
-					contacts.add(contact);
-				}
-			} catch(SQLException sqle){
-				sqle.printStackTrace();
-			}
-
-			if(rs != null){
-				try{
-					rs.close();
-				} catch(Exception e){
-					// handle the error
-				}
-			}
-		
-			if(stmt != null){
-				try{
-					stmt.close();
-				} catch(Exception e){
-					// handle the error
-				}
-			}
-		
-			if(connection != null){
-				try{
-					connection.close();
-				} catch(Exception e){
-					// handle the error
-				}
-			}	
-
-			for(Object obj: contacts){	
+			for(Object obj: getAllContacts()){	
 				Map contact = (Map) obj;
 
 				response.getWriter().println("Name:" + contact.get("name"));
@@ -137,4 +91,58 @@ public class ContactServlet extends HttpServlet {
 		}
 	}
 	
+
+	public List getAllContacts(){	
+		Connection connection = null;
+		Statement stmt = null;
+		ResultSet rs = null;
+
+		List contacts = new ArrayList();
+
+		try{
+			Class.forName("com.mysql.jdbc.Driver").newInstance();
+		} catch(Exception e){
+			// handle the error
+		}
+
+		try{
+			connection = DriverManager.getConnection("jdbc:mysql://localhost/test?" + "user=root" + "&password=");
+			stmt = connection.createStatement();
+			rs = stmt.executeQuery("select * from contact");
+			while(rs.next()){
+				Map contact = new HashMap();
+
+				contact.put("name", rs.getString("name"));
+
+				contacts.add(contact);
+			}
+		} catch(SQLException sqle){
+			sqle.printStackTrace();
+		}
+
+		if(rs != null){
+			try{
+				rs.close();
+			} catch(Exception e){
+				// handle the error
+			}
+		}
+		
+		if(stmt != null){
+			try{
+				stmt.close();
+			} catch(Exception e){
+				// handle the error
+			}
+		}
+		
+		if(connection != null){
+			try{
+				connection.close();
+			} catch(Exception e){
+				// handle the error
+			}
+		}	
+		return contacts;
+	}
 }
