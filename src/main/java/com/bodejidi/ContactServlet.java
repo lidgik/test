@@ -16,25 +16,21 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class ContactServlet extends HttpServlet {
+	
 	public void doGet(HttpServletRequest request, HttpServletResponse response) 
 		throws IOException, ServletException {
-	    Integer id = null;
-		String name = null;
-	
-		Connection connection = null;
-		Statement stmt = null;
-		ResultSet rs = null;
-		
+		ContactService contactService = new ContactService();
+
 		if(request.getParameter("contactId") == null){
 			response.getWriter().println("Get all contacts.");
 
-			for(Contact contact: getAllContacts()) {
+			for(Contact contact: contactService.getAllContacts()) {
 				response.getWriter().println("Name:" + contact.getName());
 			}
 
 		} else{
 			Contact contact = new Contact();
-			contact = getContactById(request.getParameter("contactId"));
+			contact = contactService.getContactById(request.getParameter("contactId"));
 			response.getWriter().println("get contact by id:" + request.getParameter("contactId"));
 			
 			if(contact.getId() != null){
@@ -46,108 +42,37 @@ public class ContactServlet extends HttpServlet {
 		}
 	}
 	
+}
 
-	public List<Contact> getAllContacts(){	
-		Connection connection = null;
-		Statement stmt = null;
-		ResultSet rs = null;
+class ContactService {
+	DatabaseManager db = new DatabaseManager();
+	String sql = null;
 
-		List contacts = new ArrayList();
-
-		try{
-			Class.forName("com.mysql.jdbc.Driver").newInstance();
-		} catch(Exception e){
-			// handle the error
-		}
-
-		try{
-			connection = DriverManager.getConnection("jdbc:mysql://localhost/test?" + "user=root" + "&password=");
-			stmt = connection.createStatement();
-			rs = stmt.executeQuery("select * from contact");
-			while(rs.next()){
-				Contact contact = new Contact();
-				contact = getContactFromResultSet(rs);
-				contacts.add(contact);
-			}
-		} catch(SQLException sqle){
-			sqle.printStackTrace();
-		}
-
-		if(rs != null){
-			try{
-				rs.close();
-			} catch(Exception e){
-				// handle the error
-			}
-		}
-		
-		if(stmt != null){
-			try{
-				stmt.close();
-			} catch(Exception e){
-				// handle the error
-			}
-		}
-		
-		if(connection != null){
-			try{
-				connection.close();
-			} catch(Exception e){
-				// handle the error
-			}
-		}	
+	public List<Contact> getAllContacts(){
+		List<Contact> contacts = new ArrayList();	
+		sql = "select * from contact";
+		db.connectAndExecuteQuery(sql);			
+		contacts = db.getAllContactsFromDatabase(contacts);
+		db.close();
 		return contacts;
 	}
 
 	public Contact getContactById(String id){
-		Connection connection = null;
-		Statement stmt = null;
-		ResultSet rs = null;
 		Contact contact = new Contact();
-			
-		try{
-			Class.forName("com.mysql.jdbc.Driver").newInstance();
-		} catch(Exception e){
-				// handle the error
-		}
-
-		try{
-			connection = DriverManager.getConnection("jdbc:mysql://localhost/test?" + "user=root" + "&password=");
-			stmt = connection.createStatement();
-			rs = stmt.executeQuery("select * from contact where id=" + id);
-			if(rs.next()){
-				contact = getContactFromResultSet(rs);
-			} 
-		} catch(SQLException sqle){
-			sqle.printStackTrace();
-		}
-
-		if(rs != null){
-			try{
-				rs.close();
-			} catch(Exception e){
-				// handle the error
-			}
-		}
-		
-		if(stmt != null){
-			try{
-				stmt.close();
-			} catch(Exception e){
-				// handle the error
-			}
-		}
-		
-		if(connection != null){
-			try{
-				connection.close();
-			} catch(Exception e){
-				// handle the error
-			}
-		}
+		sql = "select * from contact where id=" + id;	
+		db.connectAndExecuteQuery(sql);
+		contact = db.getContactByIdFromDatabase(contact);	
+		db.close();
 		return contact;
 	}
 	
+}
+
+class DatabaseManager {
+	Connection connection = null;
+	Statement stmt = null;
+	ResultSet rs = null;
+
 	public Contact getContactFromResultSet(ResultSet rs)
 		throws SQLException {
 		Contact contact = new Contact();
@@ -164,5 +89,83 @@ public class ContactServlet extends HttpServlet {
 		contact.setJobLevel(rs.getInt("job_level"));
 
 		return contact;
+	}
+
+	public void connectAndExecuteQuery(String sql) {
+		try{
+			Class.forName("com.mysql.jdbc.Driver").newInstance();
+		} catch(Exception e){
+				// handle the error
+		}
+
+		try{
+			connection = DriverManager.getConnection("jdbc:mysql://localhost/test?" + "user=root" + "&password=");
+			stmt = connection.createStatement();
+			rs = stmt.executeQuery(sql);
+		} catch(SQLException sqle){
+			sqle.printStackTrace();
+		}
+	}
+	
+
+	public List<Contact>getAllContactsFromDatabase(List<Contact> contacts){
+		try{
+			if(rs != null){
+				while(rs.next()){
+					contacts.add(getContactFromResultSet(rs));
+				}
+			}
+		} catch(SQLException sqle){
+			sqle.printStackTrace();
+		}
+		return contacts;
+	}
+
+	public Contact getContactByIdFromDatabase(Contact contact){
+		try{
+			if(rs.next()){
+				contact = getContactFromResultSet(rs);
+			} 
+		} catch(SQLException sqle){
+			sqle.printStackTrace();
+		}
+		return contact;	
+	}
+	
+	public void close() {
+		resultSetClose();
+		statementClose();
+		connectionClose();
+	}
+
+	private void resultSetClose(){
+		if(rs != null){
+			try{
+				rs.close();
+			} catch(Exception e){
+				// handle the error
+			}
+		}
+	}
+	
+	
+	private void statementClose(){
+		if(stmt != null){
+			try{
+				stmt.close();
+			} catch(Exception e){
+				// handle the error
+			}
+		}
+	}
+
+	private void connectionClose(){
+		if(connection != null){
+			try{
+				connection.close();
+			} catch(Exception e){
+				// handle the error
+			}
+		}
 	}
 }
